@@ -21,7 +21,7 @@
     <h1 class="text-3xl font-bold mb-4">Schritt 2: Suche dein Lied</h1>
     <!-- Search Field -->
     <div class="w-full max-w-xl mb-4">
-        <input id="searchInput" type="text" placeholder="Suche nach einem Lied..." class="w-full p-3 rounded bg-gray-800 text-white placeholder-gray-400" />
+        <input id="searchInput" type="text" placeholder="Suche nach einem Lied... (powered by iTunes)" class="w-full p-3 rounded bg-gray-800 text-white placeholder-gray-400" />
     </div>
     <!-- Results -->
     <div id="results" class="w-full max-w-xl space-y-4"></div>
@@ -39,7 +39,7 @@
         <label class="block text-sm font-medium">Song Titel</label>
         <input id="ytTitleInput" type="text" placeholder="e.g. 505" class="w-full p-2 rounded bg-gray-700 text-white">
         <div class="flex justify-between gap-2 pt-2">
-            <button id="ytSubmit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full">Weiter</button>
+            <button id="ytSubmit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full">Speichern</button>
             <button id="ytCancel" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded w-full">Abbruch</button>
         </div>
     </div>
@@ -51,7 +51,7 @@
       </button>
     </div>
     <!-- Options Modal -->
-    <div id="optionsPanel" class="fixed bottom-32 bg-gray-800 p-4 rounded-xl shadow-lg space-y-3 hidden w-72">
+    <div id="optionsPanel" class="fixed bottom-20 bg-gray-800 p-4 rounded-xl shadow-lg space-y-3 hidden w-72">
       <p class="font-semibold text-lg">Wie soll das Lied gespielt werden?</p>
       <div>
         <label class="flex items-center space-x-2">
@@ -67,7 +67,8 @@
         <label for="timestampInput" class="text-sm">Start Zeit (mm:ss)</label>
         <input id="timestampInput" type="text" placeholder="e.g. 00:45" class="w-full mt-1 p-2 rounded bg-gray-700 text-white placeholder-gray-400">
       </div>
-      <button id="startPlayback" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full">Weiter</button>
+      <button id="startPlayback" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full">Speichern</button>
+      <button id="startPlaybackCancel" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded w-full">Abbruch</button>
     </div>
     <script>
       const searchInput = document.getElementById('searchInput');
@@ -79,6 +80,7 @@
       const optionsPanel = document.getElementById('optionsPanel');
       const timestampInputWrapper = document.getElementById('timestampInputWrapper');
       const startPlayback = document.getElementById('startPlayback');
+      const startPlaybackCancel = document.getElementById('startPlaybackCancel');
       const timestampInput = document.getElementById('timestampInput');
       const customSongLink = document.getElementById('customSongLink');
       const customSongForm = document.getElementById('customSongForm');
@@ -93,7 +95,11 @@
       });
       async function performSearch() {
         const query = searchInput.value.trim();
-        if (!query) return;
+        if (!query) {
+          console.log("Empty query!")
+          resultsContainer.innerHTML = '';
+          return;
+        }
         const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&limit=10`);
         const data = await response.json();
         resultsContainer.innerHTML = '';
@@ -142,7 +148,9 @@
       });
       // Show options panel on "Continue"
       continueButton.querySelector('button').addEventListener('click', () => {
-        optionsPanel.classList.toggle('hidden');
+        optionsPanel.classList.remove('hidden');
+        continueButton.classList.add('hidden');
+        audioPlayer.pause();
       });
       // Handle "Play" button in options panel
       startPlayback.addEventListener('click', () => {
@@ -160,7 +168,12 @@
           itunesId: currentTrack.trackId,
           start
         });
-        location.href = `/submit.html?${params.toString()}`;
+        location.href = `./submit.html?${params.toString()}`;
+      });
+      //Handle cancel in options panel
+      startPlaybackCancel.addEventListener('click', () => {
+        optionsPanel.classList.add('hidden');
+        continueButton.classList.remove('hidden');
       });
       // Show the custom song form
       customSongLink.addEventListener('click', () => {
@@ -201,7 +214,7 @@
           start: timestamp || ''
         });
         console.log(params.toString());
-        location.href = `/submit.html?${params.toString()}`;
+        location.href = `./submit.html?${params.toString()}`;
       });
     </script>
 </body>

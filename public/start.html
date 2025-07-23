@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-gray-900 text-white">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Abitur - Liederabgabe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .ping {
+          animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+        @keyframes ping {
+          0% { transform: scale(1); opacity: 1; }
+          75%, 100% { transform: scale(2); opacity: 0; }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col items-center justify-start p-4">
+    <h1 class="text-3xl font-bold mb-4">Abitur - Liederabgabe</h1>
+    <!-- Search Field -->
+    <div class="w-full max-w-xl mb-4">
+        <input id="searchInput" type="text" placeholder="Gib deinen Zugangscode ein z.B. 123456" class="w-full p-3 rounded bg-gray-800 text-white placeholder-gray-400" />
+    </div>
+    <!-- Custom Song Form (initially hidden) -->
+    <div id="customSongForm" class="w-full max-w-xl bg-gray-800 p-4 mt-4 rounded hidden space-y-3">
+        <label class="block text-sm font-medium">Dein Name</label>
+        <input id="ytLinkInput" type="text" placeholder="Name" class="w-full p-2 rounded bg-gray-700 text-white">
+        <div class="flex justify-between gap-2 pt-2">
+            <button id="ytSubmit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full">Weiter</button>
+            <button id="ytCancel" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded w-full">Abbruch</button>
+        </div>
+    </div>
+    <!-- Floating Continue Button -->
+    <div id="continueButton" class="w-full max-w-xs sm:max-w-sm md:max-w-xs px-4 z-50 hidden">
+      <button class="w-full bg-green-500 hover:bg-green-600 text-white text-lg font-semibold py-3 px-6 rounded-xl shadow-lg">
+      Weiter
+      </button>
+    </div>
+    <script>
+      const searchInput = document.getElementById('searchInput');
+      const continueButton = document.getElementById('continueButton');
+      const optionsPanel = document.getElementById('optionsPanel');
+      const timestampInputWrapper = document.getElementById('timestampInputWrapper');
+      const timestampInput = document.getElementById('timestampInput');
+      const customSongLink = document.getElementById('customSongLink');
+      const customSongForm = document.getElementById('customSongForm');
+      const ytCancel = document.getElementById('ytCancel');
+      let currentSelectedItem = null;
+      let currentTrack = null;
+      let searchTimeout = null;
+      // Auto search after 500ms pause
+      searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(validateCode, 500);
+      });
+      async function validateCode() {
+        const query = searchInput.value.trim();
+        const isValid = /^\d{6}$/.test(query);
+
+        if (!isValid) {
+            continueButton.classList.add('hidden');
+            return;
+        }
+
+        console.log("VALID");
+        continueButton.classList.remove('hidden');
+      }
+      // Show Name panel on "Continue"
+      continueButton.querySelector('button').addEventListener('click', () => {
+        searchInput.disabled = true;
+        continueButton.classList.add('hidden');
+        customSongForm.classList.toggle('hidden');
+      });
+      // Cancel and restore everything
+      ytCancel.addEventListener('click', () => {
+        customSongForm.classList.add('hidden');
+        searchInput.value = "";
+        searchInput.disabled = false;
+      });
+      // Handle custom YouTube form submission
+      document.getElementById('ytSubmit').addEventListener('click', () => {
+        const name = document.getElementById('ytLinkInput').value.trim();
+        if (!name) {
+          alert('Bitte gib deinen Namen an!');
+          return;
+        }
+        const params = new URLSearchParams({
+          name
+        });
+        console.log(params.toString());
+        location.href = `./select.html?${params.toString()}`;
+      });
+    </script>
+</body>
+
+</html>

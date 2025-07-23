@@ -53,7 +53,6 @@
             // Hide loading dot
             document.getElementById('loader').classList.add('fade-out');
             document.getElementById('loader').innerHTML = "";
-            
             // Show checkmark and Text
             const check = document.getElementById('check');
             check.classList.remove('hidden');
@@ -65,9 +64,40 @@
                 check.classList.add('fade-in');
             }, 100);
         }
-        setTimeout(() => {
-            showSuccess();
-        }, 3000); // Just for show
+        // Parse query parameters for name and code
+        function getQueryParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                artist: params.get('artist'),
+                title: params.get('title'),
+                itunesId: params.get('itunesId'),
+                start: params.get('start')
+            };
+        }
+
+        async function submitSongData() {
+            const { artist, title, itunesId, start } = getQueryParams();
+            if (!artist || !title || !itunesId || !start) {
+                document.getElementById('loadingtext').textContent = 'Fehlende Songdaten!';
+                document.getElementById('loader').style.display = 'none';
+                return;
+            }
+            try {
+                // Build the query string for GET
+                const query = new URLSearchParams({ artist, title, itunesId, start }).toString();
+                const response = await fetch(`http://localhost:8000/submit.html?${query}`);
+                if (response.ok) {
+                    showSuccess();
+                } else {
+                    document.getElementById('loadingtext').textContent = 'Fehler beim Speichern!';
+                    document.getElementById('loader').style.display = 'none';
+                }
+            } catch (e) {
+                document.getElementById('loadingtext').textContent = 'Serverfehler!';
+                document.getElementById('loader').style.display = 'none';
+            }
+        }
+        submitSongData();
     </script>
 </body>
 

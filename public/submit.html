@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-gray-900 text-white">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Abitur - Liederabgabe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" crossorigin="anonymous">
+    <style>
+    .ping {
+        animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+    @keyframes ping {
+        0% { transform: scale(1); opacity: 1; }
+        75%, 100% { transform: scale(2.5); opacity: 0; }
+    }
+    .fade-out {
+        opacity: 0;
+        transition: opacity 0.5s ease;
+    }
+    .fade-in {
+        opacity: 1;
+        transform: scale(1);
+        transition: opacity 0.5s ease, transform 0.3s ease;
+    }
+    .scale-up {
+        transform: scale(1.2);
+    }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+    <h1 id="loadingtext" class="text-3xl font-bold mb-4">Speichern...</h1>
+    <h2 id="successtext"class="hidden text-2xl font-bold mb-4">Erfolg! - Du kannst deine Daten bis zu einem Monat vor der Übergabe ändern!</h2>
+    
+    <!-- Loading Container -->
+    <div id="loader" class="relative flex items-center justify-center transition-all duration-500">
+        <!-- Green dot -->
+        <div id="dot" class="w-24 h-24 bg-green-500 rounded-full transition-all duration-300"></div>
+        <!-- Pulsing effect -->
+        <div id="pulse" class="absolute inset-0 bg-green-400 rounded-full opacity-75 ping"></div>
+    </div>
+
+    <!-- Checkmark (hidden at first) -->
+    <div id="check" class="hidden transform text-green-500 transition-all duration-500 text-3xl font-bold mb-4">
+        <span class="icon">
+            <i class="fas fa-solid fa-check"></i>
+        </span>
+    </div>
+    <script>
+        function showSuccess() {
+            // Hide loading dot
+            document.getElementById('loader').classList.add('fade-out');
+            document.getElementById('loader').innerHTML = "";
+            // Show checkmark and Text
+            const check = document.getElementById('check');
+            check.classList.remove('hidden');
+            const successtext = document.getElementById('successtext');
+            successtext.classList.remove('hidden');
+            const loadingtext = document.getElementById('loadingtext');
+            loadingtext.classList.add('hidden');
+            setTimeout(() => {
+                check.classList.add('fade-in');
+            }, 100);
+        }
+        // Parse query parameters for name and code
+        function getQueryParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                artist: params.get('artist'),
+                title: params.get('title'),
+                itunesId: params.get('itunesId'),
+                start: params.get('start')
+            };
+        }
+
+        async function submitSongData() {
+            const { artist, title, itunesId, start } = getQueryParams();
+            if (!artist || !title || !itunesId || !start) {
+                document.getElementById('loadingtext').textContent = 'Fehlende Songdaten!';
+                document.getElementById('loader').style.display = 'none';
+                return;
+            }
+            try {
+                // Build the query string for GET
+                const query = new URLSearchParams({ artist, title, itunesId, start }).toString();
+                const response = await fetch(`http://localhost:8000/submit.html?${query}`);
+                if (response.ok) {
+                    showSuccess();
+                } else {
+                    document.getElementById('loadingtext').textContent = 'Fehler beim Speichern!';
+                    document.getElementById('loader').style.display = 'none';
+                }
+            } catch (e) {
+                document.getElementById('loadingtext').textContent = 'Serverfehler!';
+                document.getElementById('loader').style.display = 'none';
+            }
+        }
+        submitSongData();
+    </script>
+</body>
+
+</html>

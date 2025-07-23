@@ -2,4 +2,4 @@
 
 Website for selecting Songs for the 2026 Abitur
 
-*Currently partially functional*
+*Currently almost functional*

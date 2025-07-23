@@ -71,20 +71,27 @@
                 artist: params.get('artist'),
                 title: params.get('title'),
                 itunesId: params.get('itunesId'),
+                link: params.get('link'),
                 start: params.get('start')
             };
         }
 
         async function submitSongData() {
-            const { artist, title, itunesId, start } = getQueryParams();
-            if (!artist || !title || !itunesId || !start) {
+            const { artist, title, itunesId, link, start } = getQueryParams();
+            if (!artist || !title || !start || (!itunesId && !link)) {
                 document.getElementById('loadingtext').textContent = 'Fehlende Songdaten!';
                 document.getElementById('loader').style.display = 'none';
                 return;
             }
             try {
                 // Build the query string for GET
-                const query = new URLSearchParams({ artist, title, itunesId, start }).toString();
+                const queryObj = { artist, title, start };
+                if (itunesId) {
+                    queryObj.itunesId = itunesId;
+                } else if (link) {
+                    queryObj.link = link;
+                }
+                const query = new URLSearchParams(queryObj).toString();
                 const response = await fetch(`http://localhost:8000/submit.html?${query}`);
                 if (response.ok) {
                     showSuccess();

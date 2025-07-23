@@ -162,13 +162,24 @@
           const [min, sec] = ts.split(':').map(Number);
           start = ((min * 60 + sec) || 0).toString();
         }
-        const params = new URLSearchParams({
+        const currentUrl = location.href.split('#')[0];
+        const queryString = currentUrl.split('?')[1] || '';
+        const urlParams = new URLSearchParams(queryString);
+
+        // Define parameters in an object
+        const params = {
           artist: currentTrack.artistName,
           title: currentTrack.trackName,
           itunesId: currentTrack.trackId,
-          start
-        });
-        location.href = `./submit.html?${params.toString()}`;
+          start: start
+        };
+
+        // Append all params
+        for (const [key, value] of Object.entries(params)) {
+          urlParams.append(key, value);
+        }
+        console.log(urlParams.toString());
+        location.href = `./submit.html?${urlParams.toString()}`;
       });
       //Handle cancel in options panel
       startPlaybackCancel.addEventListener('click', () => {
@@ -207,14 +218,24 @@
           alert('Please fill in at least link, artist, and title.');
           return;
         }
-        const params = new URLSearchParams({
+        const currentUrl = location.href.split('#')[0];
+        const queryString = currentUrl.split('?')[1] || '';
+        const urlParams = new URLSearchParams(queryString);
+
+        // Define parameters in an object
+        const params = {
           link,
           artist,
           title,
           start: timestamp || ''
-        });
-        console.log(params.toString());
-        location.href = `./submit.html?${params.toString()}`;
+        };
+
+        // Append all params
+        for (const [key, value] of Object.entries(params)) {
+          urlParams.append(key, value);
+        }
+        console.log(urlParams.toString());
+        location.href = `./submit.html?${urlParams.toString()}`;
       });
     </script>
 </body>

@@ -82,12 +82,14 @@
       // Handle custom YouTube form submission
       document.getElementById('ytSubmit').addEventListener('click', () => {
         const name = document.getElementById('ytLinkInput').value.trim();
+        const token = searchInput.value.trim();
         if (!name) {
           alert('Bitte gib deinen Namen an!');
           return;
         }
         const params = new URLSearchParams({
-          name
+          name,
+          token
         });
         console.log(params.toString());
         location.href = `./select.html?${params.toString()}`;

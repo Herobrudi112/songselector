@@ -92,7 +92,7 @@
                     queryObj.link = link;
                 }
                 const query = new URLSearchParams(queryObj).toString();
-                const response = await fetch(`http://localhost:8000/submit.html?${query}`);
+                const response = await fetch(`http://localhost:8000/send?${query}`);
                 if (response.ok) {
                     showSuccess();
                 } else {

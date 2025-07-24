@@ -1,9 +1,19 @@
-from fastapi import FastAPI, Form, Query
+from fastapi import FastAPI, Form, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 import json
 import os
-from fastapi.responses import HTMLResponse
+
+from pydantic import BaseModel
+
+SONG_SUBMISSIONS_FILE = os.path.join(os.path.dirname(__file__), 'song_submissions.json')
+
+class SongBase(BaseModel):
+    artist: str
+    title: str
+    start: str
+    itunesId: str = ''
+    link: str = ''
 
 app = FastAPI()
 
@@ -18,10 +28,20 @@ app.add_middleware(
 
 SONG_SUBMISSIONS_FILE = os.path.join(os.path.dirname(__file__), 'song_submissions.json')
 
-
+def check_token(token: int):
+    tokens_file = os.path.join(os.path.dirname(__file__), 'tokens.json')
+    if os.path.exists(tokens_file):
+        with open(tokens_file, 'r', encoding='utf-8') as f:
+            try:
+                tokens = json.load(f)
+            except json.JSONDecodeError:
+                tokens = []
+    else:
+        tokens = []
+    return token in tokens
 
 @app.get("/send")
-def submit_song(
+def submit_song_get(
     name: str = Query(...),
     token: int = Query(...),
     artist: str = Query(...),
@@ -30,17 +50,8 @@ def submit_song(
     itunesId: str = Query(None),
     link: str = Query(None)
 ):
-    def check_token(token: int):
-        tokens_file = os.path.join(os.path.dirname(__file__), 'tokens.json')
-        if os.path.exists(tokens_file):
-            with open(tokens_file, 'r', encoding='utf-8') as f:
-                try:
-                    tokens = json.load(f)
-                except json.JSONDecodeError:
-                    tokens = []
-        else:
-            tokens = []
-        return token in tokens
+    if not (itunesId or link):
+        return HTMLResponse(content="Missing itunesId or link", status_code=400)
     if check_token(token):
         # Load existing song submissions
         if os.path.exists(SONG_SUBMISSIONS_FILE):
@@ -71,9 +82,38 @@ def submit_song(
             json.dump(submissions, f, ensure_ascii=False, indent=2)
         # Build confirmation HTML
         extra = f"<p><span class='font-semibold'>iTunes ID:</span> {itunesId}</p>" if itunesId else f"<p><span class='font-semibold'>Link:</span> {link}</p>"
-        return HTMLResponse(content=f"""Submission successful!{extra}""")
+        return HTMLResponse(content=f"Submission successful!{extra}")
     else:
-        return HTMLResponse(content=f"""token invalid""")
+        return HTMLResponse(content=f"token invalid")
+
+@app.post("/send")
+def submit_song_post(songdata: SongBase):
+    if songdata.itunesId == '' and songdata.link == '':
+        raise HTTPException(status_code=400, detail="Either link or itunesId is required")
+    # Load existing song submissions
+    if os.path.exists(SONG_SUBMISSIONS_FILE):
+        with open(SONG_SUBMISSIONS_FILE, 'r', encoding='utf-8') as f:
+            try:
+                submissions = json.load(f)
+            except json.JSONDecodeError:
+                submissions = []
+    else:
+        submissions = []
+    # Add new song submission
+    submission = {
+        "artist": songdata.artist,
+        "title": songdata.title,
+        "start": songdata.start
+    }
+    if songdata.itunesId != "":
+        submission["itunesId"] = songdata.itunesId
+    if songdata.link != "":
+        submission["link"] = songdata.link
+    submissions.append(submission)
+    # Save back to file
+    with open(SONG_SUBMISSIONS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(submissions, f, indent=2)
+    return {"status": "success"}
 
 if __name__ == "__main__":
     import uvicorn

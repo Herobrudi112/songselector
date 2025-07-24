@@ -1,9 +1,20 @@
-from fastapi import FastAPI, Form, Query
+from fastapi import FastAPI, Form, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 import json
 import os
-from fastapi.responses import HTMLResponse
+
+from pydantic import BaseModel
+
+SONG_SUBMISSIONS_FILE = os.path.join(os.path.dirname(__file__), 'song_submissions.json')
+
+class SongBase(BaseModel):
+    artist: str
+    title: str
+    start: str
+    itunesId: str = ''
+    link: str = ''
+
 
 app = FastAPI()
 
@@ -16,18 +27,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-SONG_SUBMISSIONS_FILE = os.path.join(os.path.dirname(__file__), 'song_submissions.json')
-
-
-
-@app.get("/send")
-def submit_song(
-    artist: str = Query(...),
-    title: str = Query(...),
-    start: str = Query(...),
-    itunesId: str = Query(None),
-    link: str = Query(None)
-):
+@app.post("/send")
+def submit_song(songdata: SongBase):
+    if songdata.itunesId == '' and songdata.link == '':
+        raise HTTPException(status_code=400, detail="Either link or itunesId is required")
     # Load existing song submissions
     if os.path.exists(SONG_SUBMISSIONS_FILE):
         with open(SONG_SUBMISSIONS_FILE, 'r', encoding='utf-8') as f:
@@ -39,21 +42,20 @@ def submit_song(
         submissions = []
     # Add new song submission
     submission = {
-        "artist": artist,
-        "title": title,
-        "start": start
+        "artist": songdata.artist,
+        "title": songdata.title,
+        "start": songdata.start
     }
-    if itunesId:
-        submission["itunesId"] = itunesId
-    if link:
-        submission["link"] = link
+    if songdata.itunesId != "":
+        submission["itunesId"] = songdata.itunesId
+    if songdata.link != "":
+        submission["link"] = songdata.link
     submissions.append(submission)
     # Save back to file
     with open(SONG_SUBMISSIONS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(submissions, f, ensure_ascii=False, indent=2)
-    # Build confirmation HTML
-    extra = f"<p><span class='font-semibold'>iTunes ID:</span> {itunesId}</p>" if itunesId else f"<p><span class='font-semibold'>Link:</span> {link}</p>"
-    return HTMLResponse(content=f"""""")
+        json.dump(submissions, f, indent=2)
+
+    return {"status": "success"}
 
 if __name__ == "__main__":
     import uvicorn

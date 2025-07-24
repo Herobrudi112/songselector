@@ -68,6 +68,8 @@
         function getQueryParams() {
             const params = new URLSearchParams(window.location.search);
             return {
+                name: params.get('name'),
+                token: params.get('token'),
                 artist: params.get('artist'),
                 title: params.get('title'),
                 itunesId: params.get('itunesId'),
@@ -77,15 +79,15 @@
         }
 
         async function submitSongData() {
-            const { artist, title, itunesId, link, start } = getQueryParams();
-            if (!artist || !title || !start || (!itunesId && !link)) {
+            const { name, token, artist, title, itunesId, link, start } = getQueryParams();
+            if (!name || !token || !artist || !title || !start || (!itunesId && !link)) {
                 document.getElementById('loadingtext').textContent = 'Fehlende Songdaten!';
                 document.getElementById('loader').style.display = 'none';
                 return;
             }
             try {
                 // Build the query string for GET
-                const queryObj = { artist, title, start };
+                const queryObj = { name, token, artist, title, start };
                 if (itunesId) {
                     queryObj.itunesId = itunesId;
                 } else if (link) {
@@ -93,8 +95,14 @@
                 }
                 const query = new URLSearchParams(queryObj).toString();
                 const response = await fetch(`http://localhost:8000/send?${query}`);
+                const text = await response.text();
                 if (response.ok) {
-                    showSuccess();
+                    if (text.trim() === 'token invalid') {
+                        document.getElementById('loadingtext').textContent = 'Ungültiger Code!';
+                        document.getElementById('loader').style.display = 'none';
+                    } else {
+                        showSuccess();
+                    }
                 } else {
                     document.getElementById('loadingtext').textContent = 'Fehler beim Speichern!';
                     document.getElementById('loader').style.display = 'none';

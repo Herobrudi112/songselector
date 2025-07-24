@@ -32,7 +32,7 @@
 
 <body class="min-h-screen flex flex-col items-center justify-center p-4">
     <h1 id="loadingtext" class="text-3xl font-bold mb-4">Speichern...</h1>
-    <h2 id="successtext"class="hidden text-2xl font-bold mb-4">Erfolg! - Du kannst deine Daten bis zu einem Monat vor der Übergabe ändern!</h2>
+    <h2 id="successtext"class="hidden text-2xl font-bold mb-4"></h2>
     
     <!-- Loading Container -->
     <div id="loader" class="relative flex items-center justify-center transition-all duration-500">
@@ -43,9 +43,9 @@
     </div>
 
     <!-- Checkmark (hidden at first) -->
-    <div id="check" class="hidden transform text-green-500 transition-all duration-500 text-3xl font-bold mb-4">
+    <div id="check" class="hidden transform transition-all duration-500 text-3xl font-bold mb-4">
         <span class="icon">
-            <i class="fas fa-solid fa-check"></i>
+            <i id="icon" class="fas fa-solid fa-check"></i>
         </span>
     </div>
     <script>
@@ -55,8 +55,31 @@
             document.getElementById('loader').innerHTML = "";
             // Show checkmark and Text
             const check = document.getElementById('check');
+            const icon = document.getElementById('icon');
+            icon.classList.add('fa-check');
+            check.classList.add('text-green-500');
             check.classList.remove('hidden');
             const successtext = document.getElementById('successtext');
+            successtext.innerHTML = "Erfolg! - Du kannst deine Daten bis zu einem Monat vor der Veranstaltung ändern!";
+            successtext.classList.remove('hidden');
+            const loadingtext = document.getElementById('loadingtext');
+            loadingtext.classList.add('hidden');
+            setTimeout(() => {
+                check.classList.add('fade-in');
+            }, 100);
+        }
+        function showError(error) {
+            // Hide loading dot
+            document.getElementById('loader').classList.add('fade-out');
+            document.getElementById('loader').innerHTML = "";
+            // Show checkmark and Text
+            const check = document.getElementById('check');
+            const icon = document.getElementById('icon');
+            icon.classList.add('fa-cross');
+            check.classList.add('text-red-500');
+            check.classList.remove('hidden');
+            const successtext = document.getElementById('successtext');
+            successtext.innerHTML = error;
             successtext.classList.remove('hidden');
             const loadingtext = document.getElementById('loadingtext');
             loadingtext.classList.add('hidden');
@@ -108,19 +131,12 @@
         const text = await response.text();
 
         if (response.ok) {
-            if (text.trim() === 'invalid_token') {
-                document.getElementById('loadingtext').textContent = 'Ungültiger Code!';
-                document.getElementById('loader').style.display = 'none';
-            } else {
                 showSuccess();
-            }
         } else {
-            document.getElementById('loadingtext').textContent = 'Fehler beim Speichern!';
-            document.getElementById('loader').style.display = 'none';
+            showError('Fehler beim Speichern!');
         }
     } catch (e) {
-        document.getElementById('loadingtext').textContent = 'Serverfehler!';
-        document.getElementById('loader').style.display = 'none';
+        showError('Serverfehler! ' + e)
     }
 }
 

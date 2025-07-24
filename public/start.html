@@ -64,8 +64,12 @@
             return;
         }
 
-        console.log("VALID");
-        continueButton.classList.remove('hidden');
+        let response = await fetch("http://localhost:8000/validate_token?token=" + query);
+        if (response.ok) {
+          continueButton.classList.remove('hidden');
+        } else {
+          continueButton.classList.add('hidden');
+        }
       }
       // Show Name panel on "Continue"
       continueButton.querySelector('button').addEventListener('click', () => {

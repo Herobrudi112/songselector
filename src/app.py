@@ -30,25 +30,22 @@ app.add_middleware(
 
 SONG_SUBMISSIONS_FILE = os.path.join(os.path.dirname(__file__), 'song_submissions.json')
 
-
-
+def check_token(token: int):
+    tokens_file = os.path.join(os.path.dirname(__file__), 'tokens.json')
+    if os.path.exists(tokens_file):
+        with open(tokens_file, 'r', encoding='utf-8') as f:
+            try:
+                tokens = json.load(f)
+            except json.JSONDecodeError:
+                tokens = []
+    else:
+        tokens = []
+    return token in tokens
 
 @app.post("/send")
 def submit_song(songdata: SongBase):  
     if not songdata.itunesId and not songdata.link:
         raise HTTPException(status_code=400, detail="Either link or itunesId is required")
-
-    def check_token(token: int):
-        tokens_file = os.path.join(os.path.dirname(__file__), 'tokens.json')
-        if os.path.exists(tokens_file):
-            with open(tokens_file, 'r', encoding='utf-8') as f:
-                try:
-                    tokens = json.load(f)
-                except json.JSONDecodeError:
-                    tokens = []
-        else:
-            tokens = []
-        return token in tokens
 
     if check_token(songdata.token):
         if os.path.exists(SONG_SUBMISSIONS_FILE):
@@ -81,9 +78,17 @@ def submit_song(songdata: SongBase):
         with open(SONG_SUBMISSIONS_FILE, 'w', encoding='utf-8') as f:
             json.dump(submissions, f, ensure_ascii=False, indent=2)
 
-        return HTMLResponse(content="success")
+        return {"detail": "success"}
     else:
-        return HTMLResponse(content="invalid_token")
+        raise HTTPException(status_code=401, detail="Token invalid!")
+
+@app.get('/validate_token')
+def validate_token(token: int = 000000):
+    if check_token(token):
+        return {"detail": "success"}
+    else:
+        raise HTTPException(status_code=401, detail="Token invalid")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

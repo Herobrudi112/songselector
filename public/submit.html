@@ -79,39 +79,51 @@
         }
 
         async function submitSongData() {
-            const { name, token, artist, title, itunesId, link, start } = getQueryParams();
-            if (!name || !token || !artist || !title || !start || (!itunesId && !link)) {
-                document.getElementById('loadingtext').textContent = 'Fehlende Songdaten!';
+    const { name, token, artist, title, itunesId, link, start } = getQueryParams();
+    if (!name || !token || !artist || !title || !start || (!itunesId && !link)) {
+        document.getElementById('loadingtext').textContent = 'Fehlende Songdaten!';
+        document.getElementById('loader').style.display = 'none';
+        return;
+    }
+
+    const songData = {
+        name,
+        token: parseInt(token),
+        artist,
+        title,
+        start,
+        itunesId: itunesId || '',
+        link: link || ''
+    };
+
+    try {
+        const response = await fetch("http://localhost:8000/send", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(songData)
+        });
+
+        const text = await response.text();
+
+        if (response.ok) {
+            if (text.trim() === 'invalid_token') {
+                document.getElementById('loadingtext').textContent = 'Ungültiger Code!';
                 document.getElementById('loader').style.display = 'none';
-                return;
+            } else {
+                showSuccess();
             }
-            try {
-                // Build the query string for GET
-                const queryObj = { name, token, artist, title, start };
-                if (itunesId) {
-                    queryObj.itunesId = itunesId;
-                } else if (link) {
-                    queryObj.link = link;
-                }
-                const query = new URLSearchParams(queryObj).toString();
-                const response = await fetch(`http://localhost:8000/send?${query}`);
-                const text = await response.text();
-                if (response.ok) {
-                    if (text.trim() === 'token invalid') {
-                        document.getElementById('loadingtext').textContent = 'Ungültiger Code!';
-                        document.getElementById('loader').style.display = 'none';
-                    } else {
-                        showSuccess();
-                    }
-                } else {
-                    document.getElementById('loadingtext').textContent = 'Fehler beim Speichern!';
-                    document.getElementById('loader').style.display = 'none';
-                }
-            } catch (e) {
-                document.getElementById('loadingtext').textContent = 'Serverfehler!';
-                document.getElementById('loader').style.display = 'none';
-            }
+        } else {
+            document.getElementById('loadingtext').textContent = 'Fehler beim Speichern!';
+            document.getElementById('loader').style.display = 'none';
         }
+    } catch (e) {
+        document.getElementById('loadingtext').textContent = 'Serverfehler!';
+        document.getElementById('loader').style.display = 'none';
+    }
+}
+
         submitSongData();
     </script>
 </body>

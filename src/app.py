@@ -115,6 +115,10 @@ def submit_song_post(songdata: SongBase):
         json.dump(submissions, f, indent=2)
     return {"status": "success"}
 
+@app.get("/tokenverify")
+def validateToken(token: str = Query(...)):
+    return check_token(token)
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

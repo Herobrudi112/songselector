@@ -98,6 +98,13 @@
         console.log(params.toString());
         location.href = `./select.html?${params.toString()}`;
       });
+      const currentUrl = location.href.split('#')[0];
+      const queryString = currentUrl.split('?')[1] || '';
+      const urlParams = new URLSearchParams(queryString);
+
+      let qr = urlParams.get('qr');
+      searchInput.value = qr;
+      validateCode();
     </script>
 </body>
 

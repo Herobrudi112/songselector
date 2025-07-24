@@ -1,7 +1,8 @@
 # songselector
 
 Website for selecting Songs for the 2026 Abitur
-*Demo is available at https://static.mosstuff.de/abi/select.html*
+## Demo
+- *https://static.mosstuff.de/abi/select.html*
 ## Features
 - FastAPI backend for handling song and user submissions
 - Frontend HTML (in /public) for user interaction

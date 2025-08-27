@@ -70,7 +70,7 @@
             return;
         }
 
-        let response = await fetch("http://localhost:8000/validate_token?token=" + query);
+        let response = await fetch("/api/validate_token?token=" + query);
         if (response.ok) {
           continueButton.classList.remove('hidden');
 

@@ -101,7 +101,7 @@
             };
         }
 
-        async function submitSongData() {
+async function submitSongData() {
     const { name, token, artist, title, itunesId, link, start } = getQueryParams();
     if (!name || !token || !artist || !title || !start || (!itunesId && !link)) {
         document.getElementById('loadingtext').textContent = 'Fehlende Songdaten!';
@@ -110,15 +110,15 @@
     }
 
     if (itunesId) {
-        const type = "itunes";
+        const kind = "itunes";
     } else {
-        const type = "url";
+        const kind = "url";
     }
 
     const songData = {
         name,
         token: parseInt(token),
-        type,
+        type: kind,
         artist,
         title,
         start: start || 0,

@@ -67,13 +67,18 @@
         let response = await fetch("http://localhost:8000/validate_token?token=" + query);
         if (response.ok) {
           continueButton.classList.remove('hidden');
-          const json = response.json();
+
+          // Await the JSON parsing
+          const json = await response.json();
+
+          // Access the data properly
           if (json.data && json.data.name) {
-            console.log(data.name);
+            console.log(json.data.name); // use json.data.name instead of data.name
           }
         } else {
           continueButton.classList.add('hidden');
         }
+
       }
       // Show Name panel on "Continue"
       continueButton.querySelector('button').addEventListener('click', () => {

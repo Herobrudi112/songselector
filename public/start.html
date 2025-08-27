@@ -67,6 +67,9 @@
         let response = await fetch("http://localhost:8000/validate_token?token=" + query);
         if (response.ok) {
           continueButton.classList.remove('hidden');
+          if (data) {
+            console.log(data.name);
+          }
         } else {
           continueButton.classList.add('hidden');
         }

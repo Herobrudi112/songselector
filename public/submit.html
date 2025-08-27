@@ -108,17 +108,17 @@ async function submitSongData() {
         document.getElementById('loader').style.display = 'none';
         return;
     }
-
+    let type;
     if (itunesId) {
-        const kind = "itunes";
+        type = "itunes";
     } else {
-        const kind = "url";
+        type = "url";
     }
 
     const songData = {
         name,
         token: parseInt(token),
-        type: kind,
+        type,
         artist,
         title,
         start: start || 0,

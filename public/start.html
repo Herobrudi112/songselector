@@ -47,6 +47,7 @@
       const customSongLink = document.getElementById('customSongLink');
       const customSongForm = document.getElementById('customSongForm');
       const ytCancel = document.getElementById('ytCancel');
+      const ytInput = document.getElementById('ytLinkInput');
       let currentSelectedItem = null;
       let currentTrack = null;
       let searchTimeout = null;
@@ -73,7 +74,7 @@
 
           // Access the data properly
           if (json.data && json.data.name) {
-            console.log(json.data.name); // use json.data.name instead of data.name
+            ytInput.value = json.data.name;
           }
         } else {
           continueButton.classList.add('hidden');

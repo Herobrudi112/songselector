@@ -109,12 +109,19 @@
         return;
     }
 
+    if (itunesId) {
+        const type = "itunes"
+    } else {
+        const type = "url"
+    }
+
     const songData = {
         name,
         token: parseInt(token),
+        type,
         artist,
         title,
-        start,
+        start: start || 0,
         itunesId: itunesId || '',
         link: link || ''
     };

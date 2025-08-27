@@ -67,7 +67,8 @@
         let response = await fetch("http://localhost:8000/validate_token?token=" + query);
         if (response.ok) {
           continueButton.classList.remove('hidden');
-          if (data) {
+          const json = response.json();
+          if (json.data && json.data.name) {
             console.log(data.name);
           }
         } else {

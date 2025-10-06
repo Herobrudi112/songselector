@@ -108,7 +108,7 @@
 
 async function submitSongData() {
     const { name, token, artist, title, itunesId, link, start } = getQueryParams();
-    if (!name || !token || !artist || !title || !start || (!itunesId && !link)) {
+    if (!name || !token || !artist || !title || (!itunesId && !link)) {
         document.getElementById('loadingtext').textContent = 'Fehlende Songdaten!';
         document.getElementById('loader').style.display = 'none';
         return;
